@@ -1,0 +1,13 @@
+server:
+  port: 8080
+
+app:
+  llm:
+    # Option A: Ollama local (FREE)
+    # Ollama provides OpenAI-compatible endpoints at:
+    #   http://localhost:11434/v1
+    baseUrl: ${LLM_BASE_URL:http://localhost:11434/v1}
+    # Default local model pulled via: ollama pull llama3.1
+    model: ${LLM_MODEL:llama3.1}
+    # Large logs get trimmed earlier, so this is only request-level timeout
+    requestTimeoutSeconds: ${LLM_TIMEOUT_SECONDS:300}

@@ -1,0 +1,5 @@
+[INFO] Building demo 0.0.1-SNAPSHOT
+[INFO] --- maven-compiler-plugin:3.11.0:compile (default-compile) @ demo ---
+[ERROR] Failed to execute goal on project demo: Could not resolve dependencies for project
+[ERROR] Could not find artifact com.fake:missing-lib:jar:9.9.9 in central (https://repo.maven.apache.org/maven2)
+[ERROR] -> [Help 1]
