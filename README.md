@@ -1,26 +1,26 @@
 # AI-Powered CI/CD Failure Analyzer
 
-An intelligent **Spring Boot** service that analyzes CI/CD pipeline logs and returns:
+An intelligent Spring Boot service that analyzes CI/CD pipeline logs and returns:
 
 - Failure type  
 - Root cause  
 - Step-by-step suggested fixes  
 - Confidence score  
 
-The goal is to **reduce manual debugging time** by extracting only the relevant error block and generating actionable remediation steps.
+The goal is to reduce manual debugging time by extracting only the relevant error block and generating actionable remediation steps.
 
 ---
 
-## Problem
+## Overview
 
-CI/CD logs are often **large, noisy, and hard to inspect manually**.  
-Finding the real failure reason takes time and slows down delivery.
+CI/CD logs are often large, noisy, and difficult to inspect manually.  
+Finding the actual failure reason slows down delivery and increases triage time.
 
 This service automates:
 
 - Extracting the important error section  
 - Classifying the failure  
-- Suggesting safe fixes  
+- Suggesting safe, actionable fixes  
 
 ---
 
@@ -28,8 +28,9 @@ This service automates:
 
 1. Upload a CI/CD log file to `/api/analyze`  
 2. Extract error-related lines using deterministic regex  
-3. Analyze extracted block to classify, find root cause, and generate fixes  
-4. Return structured JSON  
+3. Classify the failure and determine the root cause  
+4. Generate step-by-step remediation suggestions  
+5. Return structured JSON  
 
 ---
 
@@ -70,13 +71,13 @@ Returns:
 
 ## Defensive LLM Handling
 
-Model outputs are not always valid JSON. To make the API reliable:
+Model outputs are not always valid JSON. To ensure API reliability:
 
 - Strip code fences before parsing  
 - Best-effort JSON extraction  
 - Fallback text parsing if JSON parsing fails  
 
-This ensures the API always returns structured output.
+This guarantees the API always returns structured output.
 
 ---
 
@@ -91,9 +92,22 @@ This ensures the API always returns structured output.
 
 ---
 
+## Project Structure
+
+```
+src/main/java/com/<your-package>/
+├── controller        # REST endpoints
+├── service           # Analysis orchestration
+├── agents            # LogExtractorAgent, RootCauseAgent, FixSuggestionAgent
+├── model             # Response DTOs
+└── util              # JSON parsing helpers
+```
+
+---
+
 ## Running Locally
 
-You should have **Java 17** and **Maven** available.
+Ensure Java 17, Maven, and Ollama are installed.
 
 ### Prerequisites
 
@@ -101,39 +115,77 @@ You should have **Java 17** and **Maven** available.
 java -version
 mvn -version
 ollama --version
-1. Clone the Repository
+```
+
+### 1. Clone the Repository
+
+```bash
 git clone <your-repo-url>
 cd AI-Powered-CI-CD-Failure-Analyzer
-2. Start Ollama
+```
+
+### 2. Start Ollama
+
+```bash
 ollama serve
+```
 
 Pull the model (first time only):
 
+```bash
 ollama pull llama3.1
-3. Run the Spring Boot Application
+```
+
+### 3. Run the Spring Boot Application
+
+```bash
 mvn clean spring-boot:run
+```
 
 Wait until you see:
 
+```
 Tomcat started on port 8080
-4. Verify the Service
+```
+
+---
+
+### 4. Verify the Service
+
+```bash
 curl http://localhost:8080/api/health
+```
 
 Expected output:
 
+```
 ok
-5. Analyze a Sample Log
+```
+
+---
+
+### 5. Analyze a Sample Log
+
+```bash
 curl -s -X POST http://localhost:8080/api/analyze \
   -F "file=@samples/test-fail.log" | jq
+```
 
 Other examples:
 
+```bash
 curl -s -X POST http://localhost:8080/api/analyze \
   -F "file=@samples/env-fail.log" | jq
 
 curl -s -X POST http://localhost:8080/api/analyze \
   -F "file=@samples/maven-dependency-fail.log" | jq
-Example Output
+```
+
+---
+
+## Example Output
+
+```json
 {
   "errorType": "Test Failure",
   "rootCause": "One of the tests failed due to an unexpected status code.",
@@ -144,64 +196,75 @@ Example Output
   ],
   "confidence": "High"
 }
-API Endpoints
-GET /api/health
+```
+
+---
+
+## API Endpoints
+
+### GET `/api/health`
 
 Checks if the service is running.
 
-POST /api/analyze
+Response:
+
+```
+ok
+```
+
+---
+
+### POST `/api/analyze`
 
 Accepts multipart file upload:
 
-file → log file
+- `file` → CI/CD log file  
 
-Returns structured JSON with failure analysis.
+Returns structured JSON containing failure analysis.
 
-Design Decisions
+---
 
-Deterministic log extraction before LLM usage
+## Design Decisions
 
-Structured JSON schema for all responses
+- Deterministic log extraction before LLM usage  
+- Structured JSON schema for all responses  
+- Step-based fix suggestions  
+- Fallback parsing for malformed model output  
+- Safe, non-destructive remediation steps  
 
-Step-based fix suggestions
+---
 
-Fallback parsing for malformed model output
+## Limitations
 
-Safe, non-destructive remediation steps
+- Does not automatically apply fixes  
+- Classification depends on log quality  
+- Local LLM performance depends on hardware  
 
-Limitations
+---
 
-Does not automatically apply fixes
+## Future Improvements
 
-Classification depends on log quality
+- GitHub Actions integration  
+- Auto-generate pull requests for fixes  
+- Hybrid rule-based + LLM classification  
+- Store historical failures for pattern detection  
+- Confidence calibration using heuristics  
 
-Local LLM performance depends on hardware
+---
 
-Future Improvements
-
-GitHub Actions integration
-
-Auto-generate pull requests for fixes
-
-Hybrid rule-based + LLM classification
-
-Store historical failures for pattern detection
-
-Confidence calibration using heuristics
-
-Use Case
+## Use Case
 
 A CI/CD triage tool to quickly identify:
 
-Why the pipeline failed
-
-The root cause
-
-What to do next
+- Why the pipeline failed  
+- The root cause  
+- What to do next  
 
 without manually scanning large logs.
 
-Author
+---
 
-Jeevan Tumkur Venkatesh
-MS Computer Science – Syracuse University
+## Author
+
+Jeevan Tumkur Venkatesh  
+MS Computer Science – Syracuse University  
